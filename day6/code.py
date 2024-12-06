@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import numpy as np
 
-file = 'example'
+file = 'input'
            
 f = open(file,'r')
 lines_input = list(f)
@@ -42,6 +42,20 @@ directions_map = {
 3: go_west
 }
 
+directions_map_bin = {
+0: int('0001', 2),
+1: int('0010', 2), 
+2: int('0100', 2),
+3: int('1000', 2)
+}
+
+def check_and_update_direction(current_direction, new_direction):
+    if (bin(current_direction & new_direction) != bin(current_direction)):
+        res = current_direction | new_direction
+        return False, res
+    else:
+        return True, current_direction
+
 class Point:
     def __init__(self, x, y, direction):
         self.x = x
@@ -65,7 +79,7 @@ class Point:
 
 def travel(pt, matrix):
     loop = False
-    travel_poses = {pt: [pt.direction]}
+    travel_poses = {pt: directions_map_bin[pt.direction]}
 
     while pt.in_matrix():
         new_pt = directions_map[pt.direction](pt)
@@ -77,19 +91,19 @@ def travel(pt, matrix):
             pt = new_pt
             
         if pt in travel_poses:
-            if pt.direction in travel_poses[pt]:
+            res, new_dir = check_and_update_direction(travel_poses[pt], directions_map_bin[pt.direction])
+            if res:
                 loop = True
                 break
-            travel_poses[pt].append(pt.direction)
+            travel_poses[pt] = new_dir
         else:
-            travel_poses[pt] = [pt.direction]
+            travel_poses[pt] = directions_map_bin[pt.direction]
     return travel_poses, loop
 
 
 x, y = np.where(matrix > -1)
 init_pt = Point(x[0], y[0], matrix[x[0], y[0]])
 travel_poses, loop = travel(init_pt, matrix)
-
 res = len(travel_poses)
 print("Part1", res)
 
@@ -99,7 +113,7 @@ for pt in travel_poses:
         continue
     backup = matrix[pt.x, pt.y]
     matrix[pt.x, pt.y] = -2
-    travel_poses, loop = travel(init_pt, matrix)
+    temp, loop = travel(init_pt, matrix)
     if (loop):
         res_part2 += 1
 
