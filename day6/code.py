@@ -50,11 +50,13 @@ directions_map_bin = {
 }
 
 def check_and_update_direction(current_direction, new_direction):
+    if (current_direction == int('0000', 2)):
+        return new_direction
     if (bin(current_direction & new_direction) != bin(current_direction)):
-        res = current_direction | new_direction
-        return False, res
+        return current_direction | new_direction
     else:
-        return True, current_direction
+        return None
+
 
 class Point:
     def __init__(self, x, y, direction):
@@ -75,52 +77,59 @@ class Point:
         return hash((self.x, self.y))
     
     def in_matrix(self):
-        return self.x in range(0, N) and self.y in range(0, M)
+        return 0 <= self.x < N and 0 <= self.y < M
+
+
+def compute_next_point(pt, matrix):
+    new_pt = directions_map[pt.direction](pt)
+    if not new_pt.in_matrix():
+        return None
+    while (matrix[new_pt.x, new_pt.y] == -2):
+        new_pt = directions_map[(new_pt.direction+1) % 4](pt)
+    if not new_pt.in_matrix():
+        return None
+    return new_pt
+
 
 def travel(pt, matrix):
     loop = False
-    travel_poses = {pt: directions_map_bin[pt.direction]}
+    travel_matrix = np.full((N, M), int('0000', 2))
+    travel_matrix[pt.x, pt.y] = directions_map_bin[pt.direction]
+    travel_poses = [pt]
 
     while pt.in_matrix():
-        new_pt = directions_map[pt.direction](pt)
-        if not new_pt.in_matrix():
+        pt = compute_next_point(pt, matrix)
+        if not pt:
             break
-        if (matrix[new_pt.x, new_pt.y] == -2):
-            pt = directions_map[(pt.direction+1) % 4](pt)
-        else:
-            pt = new_pt
-            
-        if pt in travel_poses:
-            res, new_dir = check_and_update_direction(travel_poses[pt], directions_map_bin[pt.direction])
-            if res:
-                loop = True
-                break
-            travel_poses[pt] = new_dir
-        else:
-            travel_poses[pt] = directions_map_bin[pt.direction]
+        new_dir = check_and_update_direction(travel_matrix[pt.x, pt.y],
+                                             directions_map_bin[pt.direction])
+        if not new_dir:
+            loop = True
+            break
+        travel_matrix[pt.x, pt.y] = new_dir
+        travel_poses.append(pt)
     return travel_poses, loop
 
 
 x, y = np.where(matrix > -1)
 init_pt = Point(x[0], y[0], matrix[x[0], y[0]])
-travel_poses, loop = travel(init_pt, matrix)
-res = len(travel_poses)
+travel_poses, _ = travel(init_pt, matrix)
+
+res = len(set(travel_poses))
 print("Part1", res)
 
 res_part2 = 0
-for pt in travel_poses:
-    if (pt == init_pt):
+obstructions = set()
+for index, pt in enumerate(travel_poses):
+    if (pt == init_pt or pt in obstructions):
         continue
-    backup = matrix[pt.x, pt.y]
+    obstructions.add(pt)
     matrix[pt.x, pt.y] = -2
-    temp, loop = travel(init_pt, matrix)
-    if (loop):
-        res_part2 += 1
-
-    matrix[pt.x, pt.y] = backup
+    _, loop = travel(travel_poses[index-1], matrix)
+    res_part2 += loop
+    matrix[pt.x, pt.y] = -1
     
 print("Part2", res_part2)
-#1650 too low
     
     
     
