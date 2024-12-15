@@ -3,9 +3,9 @@ import copy
 import rustworkx as rx
 from typing import NamedTuple
 
-file_results = 'input'
+file = 'input'
 
-f = open(file_results,'r')
+f = open(file, 'r')
 init_pebbles = [int(e) for e in list(f)[0].rstrip().split(" ")]
 
 
@@ -37,8 +37,9 @@ print("Part1", len(pebbles))
 # Part2
 nb_steps = 75
 
-graph = rx.PyDiGraph(check_cycle=False)   
+graph = rx.PyDiGraph(check_cycle=False)
 pebble_to_node_index_map = dict()
+
 
 class Pebble(NamedTuple):
     index: int
@@ -50,7 +51,7 @@ def compute(node, nb_steps):
         return 1
     if nb_steps in graph[node].sizes:
         return graph[node].sizes[nb_steps]
-    
+
     children_nodes = list(graph.successor_indices(node))
     if len(children_nodes) == 0:
         new_pebbles = evolve(graph[node].index)
@@ -62,18 +63,16 @@ def compute(node, nb_steps):
                 child_node = graph.add_child(node, Pebble(pebble, {}), None)
                 pebble_to_node_index_map[pebble] = child_node
             children_nodes.append(child_node)
-    graph[node].sizes[nb_steps] = sum([compute(e, nb_steps-1) for e in children_nodes])
+    graph[node].sizes[nb_steps] = sum(
+        [compute(e, nb_steps-1) for e in children_nodes])
     return graph[node].sizes[nb_steps]
 
 
 res_part2 = 0
 for pebble in init_pebbles:
-    if not pebble in pebble_to_node_index_map:
+    if pebble not in pebble_to_node_index_map:
         index = graph.add_node(Pebble(pebble, {}))
         pebble_to_node_index_map[pebble] = index
     res_part2 += compute(pebble_to_node_index_map[pebble], nb_steps)
 
 print("Part2:", res_part2)
-
-
-    

@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 from functools import cmp_to_key
 
-file_results = 'input'
+file = 'input'
 
-f = open(file_results,'r')
+f = open(file, 'r')
 lines = list(f)
 
 rules_succ = dict()
@@ -23,6 +23,7 @@ for line in lines:
     else:
         seqs.append([int(e) for e in line.rstrip().split(",")])
 
+
 def compare(a, b):
     if a in rules_succ and b in rules_succ[a]:
         return 1
@@ -30,10 +31,12 @@ def compare(a, b):
         return -1
     return 0
 
+
 def compute_res(seq):
     N = len(seq)
     return seq[int(N/2)]
-        
+
+
 res = 0
 res_part2 = 0
 
@@ -43,11 +46,6 @@ for seq in seqs:
         res += compute_res(seq)
     else:
         res_part2 += compute_res(sorted_seq)
-                
+
 print("Part1", res)
 print("Part2", res_part2)
-
-    
-    
-    
-    

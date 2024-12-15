@@ -5,10 +5,11 @@ import copy
 
 file = 'input'
 
-f = open(file,'r')
+f = open(file, 'r')
 lines = list(f)
 
-mat = np.array([[ord(e) for e in line.rstrip()] for line in lines], dtype=np.uint32)
+mat = np.array([[ord(e) for e in line.rstrip()]
+               for line in lines], dtype=np.uint32)
 values = np.sort(np.unique(mat))
 directions = [[1, 0], [0, 1], [-1, 0], [0, -1]]
 
@@ -41,7 +42,7 @@ def compute_sides_number(mat, points, zone_label):
                     neighboors[index][i] = []
                 neighboors[index][i].append(j)
 
-    nb_elements = 0   
+    nb_elements = 0
     for neighboor in neighboors:
         for pts in neighboor.values():
             diff = np.diff(sorted(pts))
@@ -59,15 +60,14 @@ def solve(mat, values, func):
                 submat = copy.copy(mat[aslice])
                 submat[submat != value] = 0
                 labelled, nb_labels = label(submat)
-                
+
                 for zone_label in range(1, nb_labels+1):
                     positions = list(zip(*np.where(labelled == zone_label)))
-                    res += len(positions) * func(labelled, positions, zone_label)
+                    res += len(positions) * \
+                        func(labelled, positions, zone_label)
         mat[mat == value] = values[-1] + 1
     return res
 
 
 print("Part1", solve(copy.copy(mat), values, compute_perimeter))
 print("Part2", solve(copy.copy(mat), values, compute_sides_number))
-
-    

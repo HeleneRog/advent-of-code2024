@@ -2,52 +2,61 @@
 import numpy as np
 
 file = 'input'
-           
-f = open(file,'r')
+
+f = open(file, 'r')
 lines_input = list(f)
 
-def convert(e):
-    if (e=='#'):
-        return -2
-    if (e=='.'):
-        return -1
-    if (e=='^'):
-        return 0
-    if (e=='>'):
-        return 1
-    if (e=='v'):
-        return 2
-    if (e=='<'):
-        return 3  
 
-matrix = np.array([[convert(e) for e in line.rstrip()] for line in lines_input])
+def convert(e):
+    if (e == '#'):
+        return -2
+    if (e == '.'):
+        return -1
+    if (e == '^'):
+        return 0
+    if (e == '>'):
+        return 1
+    if (e == 'v'):
+        return 2
+    if (e == '<'):
+        return 3
+
+
+matrix = np.array([[convert(e) for e in line.rstrip()]
+                  for line in lines_input])
 N, M = np.shape(matrix)
+
 
 def go_north(point):
     return Point(point.x-1, point.y, 0)
 
+
 def go_east(point):
     return Point(point.x, point.y+1, 1)
+
 
 def go_south(point):
     return Point(point.x+1, point.y, 2)
 
+
 def go_west(point):
     return Point(point.x, point.y-1, 3)
 
+
 directions_map = {
-0: go_north,
-1: go_east, 
-2: go_south,
-3: go_west
+    0: go_north,
+    1: go_east,
+    2: go_south,
+    3: go_west
 }
 
 directions_map_bin = {
-0: int('0001', 2),
-1: int('0010', 2), 
-2: int('0100', 2),
-3: int('1000', 2)
+    0: int('0001', 2),
+    1: int('0010', 2),
+    2: int('0100', 2),
+    3: int('1000', 2)
 }
+
 
 def check_and_update_direction(current_direction, new_direction):
     if (current_direction == int('0000', 2)):
@@ -63,19 +72,20 @@ class Point:
         self.x = x
         self.y = y
         self.direction = direction
-        
-    def __eq__(self, other):
-        return isinstance(other, self.__class__) and self.x == other.x and self.y == other.y
-    
-    def __repr__(self):  
-        return "(% s, % s)" % (self.x, self.y)  
 
-    def __str__(self):  
+    def __eq__(self, other):
+        return (isinstance(other, self.__class__)
+                and self.x == other.x and self.y == other.y)
+
+    def __repr__(self):
         return "(% s, % s)" % (self.x, self.y)
-    
+
+    def __str__(self):
+        return "(% s, % s)" % (self.x, self.y)
+
     def __hash__(self):
         return hash((self.x, self.y))
-    
+
     def in_matrix(self):
         return 0 <= self.x < N and 0 <= self.y < M
 
@@ -128,9 +138,5 @@ for index, pt in enumerate(travel_poses):
     _, loop = travel(travel_poses[index-1], matrix)
     res_part2 += loop
     matrix[pt.x, pt.y] = -1
-    
+
 print("Part2", res_part2)
-    
-    
-    
-    

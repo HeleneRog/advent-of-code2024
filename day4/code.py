@@ -1,10 +1,11 @@
 #!/usr/bin/env python
 import numpy as np
 
-file_results = 'input'
+file = 'input'
 
-f = open(file_results,'r')
+f = open(file, 'r')
 lines = list(f)
+
 
 def convert(c):
     if c == 'X':
@@ -16,10 +17,10 @@ def convert(c):
     if c == 'S':
         return 3
 
-    
+
 matrix = [[convert(e) for e in line.rstrip()] for line in lines]
 mat = np.array(matrix)
-M, N = np.shape(mat) 
+M, N = np.shape(mat)
 
 # Part1
 res = 0
@@ -34,7 +35,7 @@ for i, j in zip(*zeros):
 print("Part1", res)
 
 
-#Part2
+# Part2
 res_part2 = 0
 A_list = np.where(mat == 2)
 
@@ -42,12 +43,7 @@ for i, j in zip(*A_list):
     if (i in [0, M-1] or j in [0, N-1]):
         continue
     if ((mat[i-1, j-1] * mat[i+1, j+1] == 3)
-        and (mat[i-1, j+1] * mat[i+1, j-1] == 3)):
+            and (mat[i-1, j+1] * mat[i+1, j-1] == 3)):
         res_part2 += 1
 
 print("Part2", res_part2)
-
-    
-    
-    
-    

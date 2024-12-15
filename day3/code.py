@@ -1,24 +1,27 @@
 #!/usr/bin/env python
 import re
 
-file_results = 'input'
+file = 'input'
 
-f = open(file_results,'r')
+f = open(file, 'r')
 line = f.read()
 
-#Part 1
+
 def compute_mul(line):
     sequences = re.findall("mul\([0-9]+,[0-9]+\)", line)
     res = 0
     for seq in sequences:
-        a, b = [int(e) if int(e) < 1000 else 0 for e in re.findall("[0-9]+", seq)]
+        a, b = [int(e) if int(e) <
+                1000 else 0 for e in re.findall("[0-9]+", seq)]
         res += a*b
     return res
 
-print("res part 1: ", compute_mul(line))    
+
+# Part 1
+print("res part 1: ", compute_mul(line))
 
 
-#Part 2
+# Part 2
 split_dont = re.split("don't()", line)
 res2 = compute_mul(split_dont[0])
 
