@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import re
 
-file = 'example'
+file = 'input'
 
 f = open(file, 'r')
 lines = list(f)
@@ -19,8 +19,12 @@ for index, pattern in enumerate(patterns):
 
 regex += ")+\Z"
 
+sizes_dict = {}
+
 
 def find_combinations(line):
+    if (line in sizes_dict):
+        return sizes_dict[line]
     nb_combs = 0
     for pattern_reg in patterns_regex_list:
         subs = re.split(pattern_reg, line)
@@ -29,19 +33,19 @@ def find_combinations(line):
         if (subs[1] == ''):
             nb_combs += 1
             continue
-        sub_combs = find_combinations(subs[1].rstrip())
-        nb_combs += sub_combs
+        nb_combs += find_combinations(subs[1])
+    sizes_dict[line] = nb_combs
     return nb_combs
 
 
-nb_sols = 0
-total_sols = 0
+nb_valid_lines = 0
+nb_combinations = 0
 for line in lines[2:]:
     x = re.search(regex, line.rstrip())
     if x:
-        nb_sols += 1
-        total_sols += find_combinations(line)
+        nb_valid_lines += 1
+        nb_combinations += find_combinations(line.rstrip())
 
 # Part 1
-print("res part 1: ", nb_sols)
-print("res part 2: ", total_sols)
+print("res part 1: ", nb_valid_lines)
+print("res part 2: ", nb_combinations)
