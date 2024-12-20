@@ -55,7 +55,7 @@ def set_free(point):
     matrix[point.x, point.y] = 1
 
 
-def find_cheat_index_part1(point, step):
+def find_cheat_path_part1(point, step):
     cheat_pt = Point(point.x + 2*step[0], point.y + 2*step[1])
     if was_reached(cheat_pt):
         duration = get_path_index(point) - get_path_index(cheat_pt) - 2
@@ -63,15 +63,25 @@ def find_cheat_index_part1(point, step):
     return False
 
 
-def find_cheat_index_part2(point, path):
-    nb_cheats = 0
+def find_cheat_paths_part2(point):
     pt_index = get_path_index(point)
-    max_index = max(0, pt_index-save_duration_thres-1)
-    for path_index, path_pt in enumerate(path[0:max_index]):
+    if (pt_index < save_duration_thres + 1):
+        return 0
+
+    x_min = max(0, point.x-max_cheat_distance)
+    x_max = min(N, point.x+max_cheat_distance+1)
+    y_min = max(0, point.y-max_cheat_distance)
+    y_max = min(N, point.y+max_cheat_distance+1)
+    path_points = np.where(path_matrix[x_min:x_max, y_min:y_max] > -1)
+
+    nb_cheats = 0
+    for x, y in list(zip(*path_points)):
+        path_pt = Point(x+x_min, y+y_min)
         man_dist = point.man_dist(path_pt)
-        duration = pt_index - path_index - man_dist
-        if ((man_dist <= max_cheat_distance)
-                and (duration >= save_duration_thres)):
+        if (man_dist > max_cheat_distance):
+            continue
+        duration = pt_index - get_path_index(path_pt) - man_dist
+        if (duration >= save_duration_thres):
             nb_cheats += 1
     return nb_cheats
 
@@ -96,7 +106,7 @@ class Point:
     def man_dist(self, other):
         return abs(other.x-self.x) + abs(other.y-self.y)
 
-    def get_neighbors(self, path):
+    def get_neighbors(self):
         nb_cheats_part1 = 0
         nb_cheats_part2 = 0
         valid_point = None
@@ -107,8 +117,8 @@ class Point:
                 valid_point = new_pt
                 continue
             if not is_valid(new_pt):
-                nb_cheats_part1 += find_cheat_index_part1(self, step)
-        nb_cheats_part2 += find_cheat_index_part2(self, path)
+                nb_cheats_part1 += find_cheat_path_part1(self, step)
+        nb_cheats_part2 += find_cheat_paths_part2(self)
         return valid_point, nb_cheats_part1, nb_cheats_part2
 
 
@@ -118,7 +128,6 @@ start_pt = Point(start_x[0], start_y[0])
 set_free(start_pt)
 
 path_matrix[start_x, start_y] = 0
-path = [start_pt]
 
 end_x, end_y = np.where(matrix == 3)
 end_pt = Point(end_x[0], end_y[0])
@@ -131,14 +140,13 @@ nb_cheats_part2 = 0
 
 while pt != end_pt:
     path_index += 1
-    new_pt, nb_saves_part1, nb_saves_part2 = pt.get_neighbors(path)
+    new_pt, nb_saves_part1, nb_saves_part2 = pt.get_neighbors()
     nb_cheats_part1 += nb_saves_part1
     nb_cheats_part2 += nb_saves_part2
     pt = new_pt
     set_path_index(pt, path_index)
-    path.append(pt)
 
-_, _, nb_saves_part2 = end_pt.get_neighbors(path)
+_, _, nb_saves_part2 = end_pt.get_neighbors()
 
 print("Part1", nb_cheats_part1)
 print("Part2", nb_cheats_part2 + nb_saves_part2)
